@@ -32,7 +32,6 @@ public class CustomCircularView extends View {
 
     private Paint mBasePaint, mDegreesPaint;
     private RectF mRect;
-    private int centerX, centerY, radius;
 
     private final Handler mFillHandler = new Handler();
     private Runnable mFillRunnable;
@@ -153,9 +152,9 @@ public class CustomCircularView extends View {
      */
     private void initRect() {
         // take the minimum of width and height here to be on he safe side:
-        centerX = getMeasuredWidth() / 2;
-        centerY = getMeasuredHeight() / 2;
-        radius = Math.min(centerX, centerY);
+        int centerX = getMeasuredWidth() / 2;
+        int centerY = getMeasuredHeight() / 2;
+        int radius = Math.min(centerX, centerY);
 
         // We have to take into account the STROKE_WIDTH with drawArc() as well as drawCircle():
         // circles as well as arcs are drawn 50% outside of the bounds defined by the radius (radius for arcs is calculated from the rectangle mRect).
@@ -183,6 +182,11 @@ public class CustomCircularView extends View {
         return areArcsRemaining;
     }
 
+
+    /**
+     * Method that returns the Runnable that will deal with arc(s) filling animation
+     * @return the Runnable
+     */
     @NonNull
     private Runnable getFillRunnable() {
         return new Runnable() {
@@ -198,6 +202,9 @@ public class CustomCircularView extends View {
         };
     }
 
+    /**
+     * Method that starts the animation fill on arc(s) when a net view setup is set
+     */
     public void startAnimatingArc() {
         if (mFillRunnable == null) {
             mFillRunnable = getFillRunnable();
@@ -208,6 +215,10 @@ public class CustomCircularView extends View {
         mFillHandler.postDelayed(mFillRunnable, ANIMATION_FILL_DELAY);
     }
 
+    /**
+     * Method that setup new view and init it.
+     * @param metrics the array of models expected to fill the arcs
+     */
     public void setupFields(MetricModel[] metrics) {
         this.mMetrics = metrics;
         this.isInitialRun = true;
