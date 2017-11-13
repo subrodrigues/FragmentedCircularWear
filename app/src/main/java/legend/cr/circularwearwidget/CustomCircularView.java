@@ -30,7 +30,7 @@ public class CustomCircularView extends View {
 
     private MetricModel[] mMetrics;
 
-    private Paint mBasePaint, mDegreesPaint, mCenterPaint, mRectPaint;
+    private Paint mBasePaint, mDegreesPaint;
     private RectF mRect;
     private int centerX, centerY, radius;
 
@@ -56,14 +56,6 @@ public class CustomCircularView extends View {
 
     private void init() {
         isInitialRun = true;
-
-        mRectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mRectPaint.setColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
-        mRectPaint.setStyle(Paint.Style.FILL);
-
-        mCenterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mCenterPaint.setColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
-        mCenterPaint.setStyle(Paint.Style.FILL);
 
         mBasePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBasePaint.setAntiAlias(true);
@@ -92,20 +84,7 @@ public class CustomCircularView extends View {
             initRect();
         }
 
-        /** Draw Background Bounds **/
-//        canvas.drawRect(mRect, mRectPaint);
-
-        /** Draw Circle **/
-//        canvas.drawCircle(centerX, centerY, radius - STROKE_WIDTH / 2, mBasePaint);
-
-        final int numFields = mMetrics.length;
-        int angleValueToIncrement = getInitialAngle(numFields);
-        int currentAngleTotal = 0;
-
-        Log.e("", " ");
-        Log.e("TOTAL", "ANGLES: " + numFields);
-
-        // initial run sets the arc containers
+        // If isInitialRun it means that a new view setup is required
         if(isInitialRun) {
             isInitialRun = false;
 
@@ -113,6 +92,13 @@ public class CustomCircularView extends View {
             mTempPercentageToAnimate = new float[mMetrics.length];
             startAnimatingArc();
         }
+
+        final int numFields = mMetrics.length;
+        int angleValueToIncrement = getInitialAngle(numFields);
+        int currentAngleTotal = 0;
+
+        Log.e("", " ");
+        Log.e("TOTAL", "ANGLES: " + numFields);
 
         for (int i = 0; i < numFields; i++) {
             /* drawing the background arc */
