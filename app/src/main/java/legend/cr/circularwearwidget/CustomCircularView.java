@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -15,16 +17,27 @@ import android.view.View;
 
 public class CustomCircularView extends View {
     private static final int STROKE_WIDTH = 20;
+
     private static final int STARTING_SPACING_ANGLE_THRESHOLD = 4;
     private static final int ENDING_SPACING_ANGLE_THRESHOLD = STARTING_SPACING_ANGLE_THRESHOLD * 2;
+
     private static final int ARC_FULL_ANGLE_VALUE = 360;
     private static final int ARC_HALF_ANGLE_VALUE = 180;
     private static final int ARC_QUARTER_ANGLE_VALUE = 90;
 
+    private static final float ANIMATED_FILL_INCREMENT_THRESHOLD = 0.05f;
+    private static final int ANIMATION_FILL_DELAY = 50;
+
+    private MetricModel[] mMetrics;
+
     private Paint mBasePaint, mDegreesPaint, mCenterPaint, mRectPaint;
     private RectF mRect;
     private int centerX, centerY, radius;
-    private MetricModel[] mMetrics;
+
+    private final Handler mFillHandler = new Handler();
+    private Runnable mFillRunnable;
+    private boolean isInitialRun = true;
+    private float[] mTempPercentageToAnimate;
 
     public CustomCircularView(Context context) {
         super(context);
@@ -42,6 +55,8 @@ public class CustomCircularView extends View {
     }
 
     private void init() {
+        isInitialRun = true;
+
         mRectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mRectPaint.setColor(ContextCompat.getColor(getContext(), android.R.color.transparent));
         mRectPaint.setStyle(Paint.Style.FILL);
@@ -90,15 +105,23 @@ public class CustomCircularView extends View {
         Log.e("", " ");
         Log.e("TOTAL", "ANGLES: " + numFields);
 
+        // initial run sets the arc containers
+        if(isInitialRun) {
+            isInitialRun = false;
+
+            // init tempAngleToAnimate in order to animate filling bars
+            mTempPercentageToAnimate = new float[mMetrics.length];
+            startAnimatingArc();
+        }
+
         for (int i = 0; i < numFields; i++) {
             /* drawing the background arc */
             canvas.drawArc(mRect, currentAngleTotal + (numFields == 1 ? 0 : STARTING_SPACING_ANGLE_THRESHOLD), angleValueToIncrement - (numFields == 1 ? 0 : ENDING_SPACING_ANGLE_THRESHOLD), false, mBasePaint);
 
-            Log.e(" ANGLES", "START: " + i + " inc: " + angleValueToIncrement);
-
-            /* drawing the filled arc bar (percentage value) */
-            float percentFill = mMetrics[i].getCurrentPercentageValue() * angleValueToIncrement;
-            canvas.drawArc(mRect, currentAngleTotal + STARTING_SPACING_ANGLE_THRESHOLD, percentFill - ENDING_SPACING_ANGLE_THRESHOLD, false, mDegreesPaint);
+            /** drawing the filled arc bar (percentage value) **/
+            float percentAngleToFill = mTempPercentageToAnimate[i] * angleValueToIncrement;
+            Log.e(" FILLING", "Max Percentage: " + mMetrics[i].getCurrentPercentageValue()  + "\n Percentage inc:  " + mTempPercentageToAnimate[i] + "\n Percent Angle: " + percentAngleToFill);
+            canvas.drawArc(mRect, currentAngleTotal + STARTING_SPACING_ANGLE_THRESHOLD, percentAngleToFill - ENDING_SPACING_ANGLE_THRESHOLD > 0.0f ? percentAngleToFill - ENDING_SPACING_ANGLE_THRESHOLD : 0.0f, false, mDegreesPaint);
 
             currentAngleTotal += angleValueToIncrement;
             /** With an odd number of fields we need to change angleValueToIncrement on-the-fly for the last item **/
@@ -143,8 +166,51 @@ public class CustomCircularView extends View {
         mRect = new RectF(startTopAndLeft, startTopAndLeft, endBottomAndRight, endBottomAndRight);
     }
 
+    /**
+     * Aux method to getFillRunnable().
+     * Update temporary percentage values and notifies Runnable in case we have remaining arcs to animate.
+     *
+     * @return boolean notifying the Runnable if some arcs are remaining to be animated
+     */
+    private boolean updateTempPercentageToAnimate() {
+        boolean areArcsRemaining = false;
+        for(int i = 0; i < mMetrics.length; i++){
+            if(mTempPercentageToAnimate[i] < mMetrics[i].getCurrentPercentageValue()){
+                mTempPercentageToAnimate[i] += ANIMATED_FILL_INCREMENT_THRESHOLD;
+                areArcsRemaining = true;
+            }
+        }
+        return areArcsRemaining;
+    }
+
+    @NonNull
+    private Runnable getFillRunnable() {
+        return new Runnable() {
+            public void run() {
+                if (updateTempPercentageToAnimate()) {
+                    invalidate();
+
+                    mFillHandler.postDelayed(this, ANIMATION_FILL_DELAY);
+                } else {
+                    mFillHandler.removeCallbacks(this);
+                }
+            }
+        };
+    }
+
+    public void startAnimatingArc() {
+        if(mFillRunnable == null){
+            mFillRunnable = getFillRunnable();
+        } else {
+            mFillHandler.removeCallbacks(mFillRunnable);
+        }
+
+        mFillHandler.postDelayed(mFillRunnable, ANIMATION_FILL_DELAY);
+    }
+
     public void setupFields(MetricModel[] metrics) {
         this.mMetrics = metrics;
+        this.isInitialRun = true;
         this.invalidate();
     }
 
