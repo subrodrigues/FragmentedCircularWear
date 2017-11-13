@@ -73,6 +73,14 @@ public class CustomCircularView extends View {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        if(mFillHandler != null && mFillRunnable != null)
+            mFillHandler.removeCallbacks(mFillRunnable);
+
+        super.onDetachedFromWindow();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
@@ -85,7 +93,7 @@ public class CustomCircularView extends View {
         }
 
         // If isInitialRun it means that a new view setup is required
-        if(isInitialRun) {
+        if (isInitialRun) {
             isInitialRun = false;
 
             // init tempAngleToAnimate in order to animate filling bars
@@ -106,8 +114,14 @@ public class CustomCircularView extends View {
 
             /** drawing the filled arc bar (percentage value) **/
             float percentAngleToFill = mTempPercentageToAnimate[i] * angleValueToIncrement;
-            Log.e(" FILLING", "Max Percentage: " + mMetrics[i].getCurrentPercentageValue()  + "\n Percentage inc:  " + mTempPercentageToAnimate[i] + "\n Percent Angle: " + percentAngleToFill);
-            canvas.drawArc(mRect, currentAngleTotal + STARTING_SPACING_ANGLE_THRESHOLD, percentAngleToFill - ENDING_SPACING_ANGLE_THRESHOLD > 0.0f ? percentAngleToFill - ENDING_SPACING_ANGLE_THRESHOLD : 0.0f, false, mDegreesPaint);
+            Log.e(" FILLING", "Max Percentage: " + mMetrics[i].getCurrentPercentageValue() + "\n Percentage inc:  " + mTempPercentageToAnimate[i] + "\n Percent Angle: " + percentAngleToFill);
+
+            if (angleValueToIncrement == ARC_FULL_ANGLE_VALUE) {
+                canvas.drawArc(mRect, currentAngleTotal, percentAngleToFill, false, mDegreesPaint);
+            } else {
+                final float percentAngleWithThreshold = percentAngleToFill - ENDING_SPACING_ANGLE_THRESHOLD;
+                canvas.drawArc(mRect, currentAngleTotal + STARTING_SPACING_ANGLE_THRESHOLD, percentAngleWithThreshold > 0.0f ? percentAngleWithThreshold : 0.0f, false, mDegreesPaint);
+            }
 
             currentAngleTotal += angleValueToIncrement;
             /** With an odd number of fields we need to change angleValueToIncrement on-the-fly for the last item **/
@@ -160,8 +174,8 @@ public class CustomCircularView extends View {
      */
     private boolean updateTempPercentageToAnimate() {
         boolean areArcsRemaining = false;
-        for(int i = 0; i < mMetrics.length; i++){
-            if(mTempPercentageToAnimate[i] < mMetrics[i].getCurrentPercentageValue()){
+        for (int i = 0; i < mMetrics.length; i++) {
+            if (mTempPercentageToAnimate[i] < mMetrics[i].getCurrentPercentageValue()) {
                 mTempPercentageToAnimate[i] += ANIMATED_FILL_INCREMENT_THRESHOLD;
                 areArcsRemaining = true;
             }
@@ -185,7 +199,7 @@ public class CustomCircularView extends View {
     }
 
     public void startAnimatingArc() {
-        if(mFillRunnable == null){
+        if (mFillRunnable == null) {
             mFillRunnable = getFillRunnable();
         } else {
             mFillHandler.removeCallbacks(mFillRunnable);
