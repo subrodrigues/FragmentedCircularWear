@@ -26,7 +26,7 @@ public class CustomCircularView extends View {
     private static final int ARC_QUARTER_ANGLE_VALUE = 90;
 
     private static final float ANIMATED_FILL_INCREMENT_THRESHOLD = 0.05f;
-    private static final int ANIMATION_FILL_DELAY = 50;
+    private static final int ANIMATION_FILL_DELAY = 25;
 
     private MetricModel[] mMetrics;
 
@@ -61,14 +61,14 @@ public class CustomCircularView extends View {
         mBasePaint.setStyle(Paint.Style.STROKE);
         mBasePaint.setStrokeWidth(STROKE_WIDTH);
         mBasePaint.setStrokeCap(Paint.Cap.ROUND);
-        mBasePaint.setColor(ContextCompat.getColor(getContext(), R.color.blue));
+        mBasePaint.setColor(ContextCompat.getColor(getContext(), R.color.semitransparent_grey));
 
         mDegreesPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mDegreesPaint.setAntiAlias(true);
         mDegreesPaint.setStyle(Paint.Style.STROKE);
         mDegreesPaint.setStrokeWidth(STROKE_WIDTH);
         mDegreesPaint.setStrokeCap(Paint.Cap.ROUND);
-        mDegreesPaint.setColor(ContextCompat.getColor(getContext(), R.color.green));
+        mDegreesPaint.setColor(ContextCompat.getColor(getContext(), android.R.color.holo_blue_light));
     }
 
     @Override
