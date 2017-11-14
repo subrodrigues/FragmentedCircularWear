@@ -15,7 +15,7 @@ import android.view.View;
  * Created by filiperodrigues on 10/11/17.
  */
 
-public class CustomCircularView extends View {
+public class SectionedCircularView extends View {
     private static final int STROKE_WIDTH = 20;
 
     private static final int STARTING_SPACING_ANGLE_THRESHOLD = 4;
@@ -38,17 +38,17 @@ public class CustomCircularView extends View {
     private boolean isInitialRun = true;
     private float[] mTempPercentageToAnimate;
 
-    public CustomCircularView(Context context) {
+    public SectionedCircularView(Context context) {
         super(context);
         init();
     }
 
-    public CustomCircularView(Context context, AttributeSet attrs) {
+    public SectionedCircularView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public CustomCircularView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SectionedCircularView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }

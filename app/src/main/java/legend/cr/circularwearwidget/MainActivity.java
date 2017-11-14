@@ -25,12 +25,11 @@ public class MainActivity extends WearableActivity {
                     metrics[i] = new MetricModel(100, random.nextInt(100));
                 }
 
-                ((CustomCircularView) findViewById(R.id.segmented_metrics)).setupFields(metrics);
+                ((SectionedCircularView) findViewById(R.id.segmented_metrics)).setupFields(metrics);
             }
         });
         // Enables Always-on
         setAmbientEnabled();
     }
-
 
 }

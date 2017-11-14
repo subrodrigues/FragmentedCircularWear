@@ -12,7 +12,7 @@
     tools:context="legend.cr.circularwearwidget.MainActivity"
     tools:deviceIds="wear" >
 
-        <legend.cr.circularwearwidget.CustomCircularView
+        <legend.cr.circularwearwidget.SectionedCircularView
             android:id="@+id/segmented_metrics"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
